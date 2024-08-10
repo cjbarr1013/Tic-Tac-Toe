@@ -78,7 +78,7 @@ function Square() {
     return {getValue, addPiece};
 };
 
-function Player(name) {
+function Player(name, piece, id) {
     let turn = false;
     const isTurn = () => turn;
     const changeTurn = () => isTurn() ? turn = false : turn = true;
@@ -87,7 +87,10 @@ function Player(name) {
     const getScore = () => score;
     const win = () => score++;
 
-    return {name, isTurn, changeTurn, getScore, win};
+    const getPiece = () => piece;
+    const getId = () => id;
+
+    return {name, piece, id, isTurn, changeTurn, getScore, win, getPiece, getId};
 };
 
 let game = (function () {
@@ -114,29 +117,64 @@ let game = (function () {
 })();
 
 const display = (function () {
-    const userMsg = document.querySelector(".user-msg");
+    const grid = document.querySelector(".grid-container");
+    const squares = grid.querySelectorAll(":scope > div");
+    const user = document.querySelector("#user");
+    const userMsg = document.querySelector("#msg");
     const scorePlayer1 = document.querySelector("#score-1");
     const scorePlayer2 = document.querySelector("#score-2");
     
+    const changeColor = (elem, player) => {
+        if (player.id === 1) {
+            elem.classList.add("p1");
+            elem.classList.remove("p2");
+        } else {
+            elem.classList.add("p2");
+            elem.classList.remove("p1");
+        };
+        changeHoverColor(player)
+    };
+
+    const changeHoverColor = (player) => {
+        if (player.id === 1) {
+            squares.forEach((element) => {
+                element.classList.add("p1-hover");
+                element.classList.remove("p2-hover");
+            });
+        } else {
+            squares.forEach((element) => {
+                element.classList.add("p2-hover");
+                element.classList.remove("p1-hover");
+            });
+        };
+    };
+
     const fillBoard = (board) => {
         for (let i = 0; i < board.getBoard().length; i++) {
             for (let j = 0; j < board.getBoard()[i].length; j++) {
                 const square = document.querySelector(`#s${i}${j}`);
-                square.textContent = board.getBoard()[i][j].getValue().name;
+                let player = board.getBoard()[i][j].getValue();
+                changeColor(square, player);
+                square.textContent = player.piece;
             };
         };
     };
 
     const turnMessage = (player) => {
-        return userMsg.textContent = `${player.name}, it's your turn.`;
+        changeColor(user, player);
+        user.textContent = player.name;
+        userMsg.textContent = ", it's your turn.";
     };
 
     const winMessage = (player) => {
-        return userMsg.textContent = `Congrats ${player.name}, you won! Press RESET to play again.`;
+        changeColor(user, player);
+        user.textContent = player.name;
+        userMsg.textContent = " wins! Press RESET to play again.";
     };
 
     const tieMessage = () => {
-        return userMsg.textContent = "The game has ended in a tie! Press RESET to play again.";
+        user.textContent = "";
+        userMsg.textContent = "The game has ended in a tie! Press RESET to play again.";
     };
 
     const toggleReset = (reset, bool) => reset.disabled = bool;
@@ -146,15 +184,31 @@ const display = (function () {
         scorePlayer2.textContent = player2.getScore();
     };
 
-    return {fillBoard, winMessage, tieMessage, turnMessage, toggleReset, updateScore};
+    const changeName = (elem, player) => {
+        const newName = prompt("What is your name?");
+        if (newName != null && newName != "") {
+            player.name = newName;
+        };
+        updateName(elem, player);
+    }
+
+    const updateName = (elem, player) => elem.textContent = player.name;
+
+    return {fillBoard, winMessage, tieMessage, turnMessage, 
+            toggleReset, updateScore, changeName, updateName};
 })();
 
+
 // Game flow using objects
-const player1 = Player("Player 1");
-const player2 = Player("Player 2");
+const player1 = Player("Player 1", "X", 1);
+const player2 = Player("Player 2", "O", 2);
+const player1Element = document.querySelector("#user-1")
+const player2Element = document.querySelector("#user-2")
 const reset = document.querySelector("#reset");
 
 player1.changeTurn();
+display.updateName(player1Element, player1)
+display.updateName(player2Element, player2)
 display.turnMessage(game.getActivePlayer(player1, player2));
 display.toggleReset(reset, true);
 
@@ -173,6 +227,20 @@ squares.forEach((square) => {
             };
         };
     });
+});
+
+player1Element.addEventListener("click", () => {
+    display.changeName(player1Element, player1);
+    if (game.isActive()) {
+        display.turnMessage(game.getActivePlayer(player1, player2));
+    };
+});
+
+player2Element.addEventListener("click", () => {
+    display.changeName(player2Element, player2);
+    if (game.isActive()) {
+        display.turnMessage(game.getActivePlayer(player1, player2));
+    };
 });
 
 reset.addEventListener("click", () => {

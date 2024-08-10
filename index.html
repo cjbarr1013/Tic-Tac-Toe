@@ -7,14 +7,14 @@
     <link rel="stylesheet" href="styles.css">
     <script src="script.js" defer></script>
 </head>
-<body>
+<body class="background-style">
     <h1>Tic-Tac-Toe</h1>
     <div class="scoreboard">
-        <div class="player">
-            <p>Player 1: <span id="score-1"></span></p>
+        <div class="player p1">
+            <p><span id="user-1"></span>: <span id="score-1">0</span></p>
         </div>
-        <div class="player">
-            <p>Player 2: <span id="score-2"></span></p>
+        <div class="player p2">
+            <p><span id="user-2"></span>: <span id="score-2">0</span></p>
         </div>
     </div>
     <div class="gameboard">
@@ -30,7 +30,7 @@
             <div id="s22"></div>
         </div>
     </div>
-    <p class="user-msg"></p>
+    <p class="user-msg"><span id="user"></span><span id="msg"></span></p>
     <button id="reset">RESET</button>
 </body>
 </html>
